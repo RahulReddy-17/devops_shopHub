@@ -16,7 +16,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'npm test -- --reporter mocha-junit-reporter --reporter-options mochaFile=reports/test-results.xml'
+                bat 'npm test'
             }
         }
 
