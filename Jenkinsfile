@@ -1,85 +1,41 @@
 pipeline {
     agent any
 
-    tools {
-        flutter 'flutter-sdk' // Must be configured in Jenkins "Global Tool Configuration"
-    }
-
-    environment {
-        GIT_REPO = 'https://github.com/RahulReddy-17/devops_shopHub.git'
-    }
-
     stages {
-
-        stage('Clone Repository') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Cloning the repository...'
-                git branch: 'main', url: "${env.GIT_REPO}"
-            }
-        }
-
-        stage('Setup Environment') {
-            steps {
-                echo 'Setting up Flutter environment...'
-                sh 'flutter clean'
-                sh 'flutter pub get'
-            }
-        }
-
-        stage('Static Analysis') {
-            steps {
-                echo 'Analyzing Dart code...'
-                sh 'flutter analyze'
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                echo 'Running tests...'
-                sh 'flutter test --coverage'
-            }
-            post {
-                always {
-                    junit '**/test-results.xml'
-                    cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage/lcov.info'
+                script {
+                    sh 'npm install'
                 }
             }
         }
-
-        stage('Build APK') {
+        stage('Run Tests') {
             steps {
-                echo 'Building release APK...'
-                sh 'flutter build apk --release'
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
+                script {
+                    sh 'npm run test'
                 }
             }
         }
-
-        stage('Optional: Deploy to Firebase App Distribution') {
-            when {
-                environment name: 'FIREBASE_TOKEN', value: ''
-            }
+        stage('Build') {
             steps {
-                echo 'Deploying release build to Firebase App Distribution...'
-                sh '''
-                firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
-                  --app $FIREBASE_APP_ID \
-                  --groups "testers" \
-                  --token $FIREBASE_TOKEN
-                '''
+                script {
+                    sh 'npm run build'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    sh 'npm run deploy'
+                }
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Build and tests succeeded!'
-        }
-        failure {
-            echo '❌ Pipeline failed. Check logs for details.'
+        always {
+            junit 'test-results/*.xml'
+            archiveArtifacts artifacts: 'build/**/*', fingerprint: true
         }
     }
 }
