@@ -2,40 +2,40 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/RahulReddy-17/devops_shopHub.git'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                script {
-                    sh 'npm install'
-                }
+                bat 'npm install'
             }
         }
+
         stage('Run Tests') {
             steps {
-                script {
-                    sh 'npm run test'
-                }
+                bat 'npm test -- --reporter mocha-junit-reporter --reporter-options mochaFile=reports/test-results.xml'
             }
         }
+
         stage('Build') {
             steps {
-                script {
-                    sh 'npm run build'
-                }
+                bat 'npm run build'
             }
         }
+
         stage('Deploy') {
             steps {
-                script {
-                    sh 'npm run deploy'
-                }
+                bat 'echo Deploying your project...'
             }
         }
     }
 
     post {
         always {
-            junit 'test-results/*.xml'
-            archiveArtifacts artifacts: 'build/**/*', fingerprint: true
+            junit 'reports/**/*.xml'
         }
     }
 }
