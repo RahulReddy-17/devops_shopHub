@@ -16,7 +16,8 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'npm test'
+                // Use npx to ensure vitest runs from local node_modules
+                bat 'npx vitest --reporter=junit --outputFile=reports/test-results.xml'
             }
         }
 
@@ -35,7 +36,8 @@ pipeline {
 
     post {
         always {
-            junit 'reports/**/*.xml'
+            // Publish JUnit test results for Jenkins UI
+            junit 'reports/test-results.xml'
         }
     }
 }
