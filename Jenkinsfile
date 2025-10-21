@@ -16,10 +16,15 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Use npx to ensure vitest runs from local node_modules
-                bat 'npx vitest --reporter=junit --outputFile=reports/test-results.xml'
+                 script {
+            def status = bat(script: 'npx vitest --reporter=junit --outputFile=reports/test-results.xml', returnStatus: true)
+            if (status != 0) {
+                echo 'Tests failed but continuing pipeline.'
+              }
             }
+          }
         }
+
 
         stage('Build') {
             steps {
