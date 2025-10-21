@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        GIT_REPO = 'https://github.com/Aash0811/shop_hub.git'
+        GIT_REPO = 'https://github.com/RahulReddy-17/devops_shopHub.git'
     }
 
     stages {
